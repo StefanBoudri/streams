@@ -43,7 +43,7 @@ Streams can be created from most collection classes using `.stream()`:
 
 ## Methodology
 
-Benchmarks measured performance of **loops**, **sequential streams**, and **parallel streams** on `ArrayList`, `HashSet`, and `HashMap`. In [this](./benchmark.md) file everything of the benchmark is explained.
+Benchmarks measured performance of **loops**, **sequential streams**, and **parallel streams** on `ArrayList`, `HashSet`, and `HashMap` (Boudri, 2025).
 
 Measurements included:
 
@@ -126,16 +126,13 @@ While loops are still valid, streams reduce boilerplate, handle complex transfor
 
 ## References
 
-* Oracle. (2025, October 20). [https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html)
-* Baeldung. (2023, November 4). Introduction to Java Streams | Baeldung. [https://www.baeldung.com/java-8-streams-introduction](https://www.baeldung.com/java-8-streams-introduction)
-* Paraschiv, E. (2024, September 4). A Guide to Java Streams: In-Depth Tutorial with Examples. [https://stackify.com/streams-guide-java-8/](https://stackify.com/streams-guide-java-8/)
-* TutorialsPoint. Java - Streams. (n.d.). [https://www.tutorialspoint.com/java/java_streams.htm](https://www.tutorialspoint.com/java/java_streams.htm)
-* Baeldung. (2025, November 10). Working with Maps Using Streams | Baeldung. [https://www.baeldung.com/java-maps-streams](https://www.baeldung.com/java-maps-streams)
-* Benchmark CSV files:
+* Baeldung. (2023, November 4). Introduction to Java Streams | Baeldung. https://www.baeldung.com/java-8-streams-introduction
+* Baeldung. (2025, November 10). Working with Maps Using Streams | Baeldung. https://www.baeldung.com/java-maps-streams
+* Boudri, S. (2025, November 14). Benchmarking streams in Java with JMH. [Benchmark paper](./benchmark.md)
+* Oracle. (2025, October 20). https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html
+* Paraschiv, E. (2024, September 4). A Guide to Java Streams: In-Depth Tutorial with Examples. https://stackify.com/streams-guide-java-8/
+* TutorialsPoint. Java - Streams. (n.d.). https://www.tutorialspoint.com/java/java_streams.htm
 
-  * [List benchmark](./benchmark/list-benchmark-results.csv)
-  * [Set benchmark](./benchmark/set-benchmark-results.csv)
-  * [Map benchmark](./benchmark/map-benchmark-results.csv)
 
 
 
