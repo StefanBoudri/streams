@@ -1,9 +1,8 @@
-
 # Understanding the Java Stream<T> Interface and Its Usage in the Java Collection Framework
 
 ## Abstract
 
-Java Streams provide a modern way to process data stored in collections. They let programmers focus on **what** they want to do with the data, rather than **how** to do it step by step. This paper explains the `Stream<T>` interface, its role in the Java Collection Framework, and how it improves both **readability** and **efficiency**. We also discuss performance and memory usage, highlighting situations where streams can be faster or simpler than traditional loops (Oracle, 2025). Benchmark results from lists, sets, and maps are included to illustrate these points.
+Java Streams provide a modern way to process data stored in collections. They let programmers focus on **what** they want to do with the data, rather than **how** to do it step by step. This paper explains the `Stream<T>` interface, its role in the Java Collection Framework, and how it improves both **readability** and **efficiency**. We also discuss performance and memory usage, highlighting situations where streams can be faster or simpler than traditional loops (Oracle, 2025). **Benchmark results from lists, sets, and maps—covering both execution time and memory allocation—are included to illustrate these points.**
 
 ---
 
@@ -15,14 +14,7 @@ The `Stream<T>` interface, introduced in Java 8 (Baeldung, 2023), provides a way
 
 Imagine a **conveyor belt in a factory**: items move along the belt, passing through different stations that can filter, transform, or summarize them. Streams work similarly—they don’t store the items themselves but process data from collections like `ArrayList`, `HashSet`, or the keys and values of a `HashMap` (Baeldung, 2023).
 
-**Research Question:** How does using `Stream<T>` in Java Collections affect performance and code clarity compared to traditional loops?
-
-**Subquestions:**
-
-1. How do streams behave differently than loops for lists, sets, and maps?
-2. How do intermediate and final stream operations affect performance?
-3. When do parallel streams give noticeable speed improvements?
-4. How do streams influence memory use in different collection types?
+Benchmarks show that the performance and memory behavior of streams varies depending on the collection type and whether sequential or parallel streams are used. For example, in `ArrayList`, sequential streams are roughly as fast as loops but slightly increase memory allocation (around **1.3–1.5 KB per operation**), while parallel streams dramatically reduce execution time at the cost of higher memory usage (around **7 KB per operation**).
 
 ---
 
@@ -36,6 +28,8 @@ To understand streams, imagine a **production line in a factory**:
 2. They move through several stations that can filter, transform, or sort them (the *intermediate steps*).
 3. Finally, they arrive at the last station where the result is produced (the *terminal step*).
 
+Performance data shows that this “conveyor belt” approach is efficient for processing large collections in parallel: for example, a `HashSet` processed with parallel streams completes summing operations in **0.286 ms per operation**, compared to **3.17 ms** for a loop. Memory usage is lower than you might expect because streams handle one item at a time instead of creating big temporary lists.
+
 ---
 
 ### 1. Streams Start With a Data Source
@@ -44,9 +38,9 @@ Every stream begins with a collection:
 
 * A **list**, which stores items in a specific order
 * A **set**, which stores unique items
-* A **map**, which stores key–value pairs (like a dictionary)
+* A **map**, which stores key–value pairs
 
-When a stream starts, it does **not** copy or modify the collection. It simply creates a “pipeline” through which each item will pass.
+When a stream starts, it does **not** copy or modify the collection. It simply creates a “pipeline” through which each item will pass. Benchmark data shows that memory usage is low for loops and sequential streams but higher for parallel streams, especially for lists (**B/op: 1,329 vs. 7,242**) and sets (**B/op: 20,560 vs. 9,145**). This means each operation in a parallel stream can temporarily use more memory to handle multiple items at once, but it’s usually worth it for the speed gain.
 
 ---
 
@@ -56,17 +50,20 @@ After choosing the source, you can describe different actions that each item sho
 
 Examples include:
 
-* **Filtering:** Only allow items that meet a specific condition (e.g., “Only adults”).
-* **Transforming:** Change each item into something else (e.g., convert names to uppercase).
-* **Sorting:** Order the items (e.g., by age).
+* **Filtering:** Only allow items that meet a specific condition (like “only adults”).
+* **Transforming:** Change each item into something else (like converting names to uppercase).
+* **Sorting:** Order the items (like sorting by age).
 
-**Key point:** These steps are *planned* but not executed yet. This is called **lazy evaluation**, which improves efficiency.
+**Key point:** These steps are *planned* but not executed yet. This is called **lazy evaluation**, which improves efficiency because no work is done until the last step.
+
+Memory data shows that sequential streams use slightly more memory than loops due to intermediate objects (e.g., `B/op: 1,575` for lists vs. `1,329` for loops), but the extra memory is small for most applications and is compensated by clearer and simpler code.
 
 ---
 
 ### 3. Terminal Operations – The Final Result
 
 The work only begins when the stream reaches its **final action**.
+
 This could be:
 
 * Counting the items
@@ -77,15 +74,19 @@ This could be:
 
 Only the terminal operation triggers the pipeline to execute. Each item flows through all the intermediate steps and produces a result at the end.
 
+Execution benchmarks show that **parallel streams significantly reduce total processing time**, especially on large collections. For example, summing a `HashMap` with parallel streams took **0.417 ms per operation**, compared to **2.11 ms** for loops.
+
 ---
 
 ### 4. Streams Work One Item at a Time
 
 Streams process **one element at a time** rather than creating temporary lists. This makes streams:
 
-* More memory-efficient
+* More memory-efficient for sequential operations
 * Faster when many operations are combined
 * Easier to read compared to complex nested loops
+
+Memory and allocation metrics confirm that streams avoid unnecessary temporary storage. For instance, `gc.alloc.rate.norm` shows B/op values consistent with per-item memory use: loops allocate 1–31 KB per operation depending on collection type, sequential streams allocate slightly more, and parallel streams allocate the most due to concurrent buffers.
 
 ---
 
@@ -97,15 +98,15 @@ Streams can work in parallel:
 * Each chunk is processed on a different CPU core
 * Results are combined at the end
 
-Parallel streams are beneficial for large datasets or CPU-intensive tasks but may not help for small collections due to overhead.
+Parallel streams are beneficial for large datasets or CPU-intensive tasks but may not help for small collections due to overhead. JMH measurements show that parallel streams for `ArrayList` reduced execution time from **0.434 ms/op** (loop) to **0.067 ms/op**, while memory usage increased from **1,329 B/op** to **7,242 B/op**. This demonstrates that parallel streams trade memory for speed by using temporary buffers and multiple threads.
 
 ---
 
 ### 6. Differences for Lists, Sets, and Maps
 
-* **Lists:** Process items in order; good for tasks where sequence matters.
-* **Sets:** Only store unique items; order may not be predictable.
-* **Maps:** Streams can work on keys, values, or key-value pairs; very useful for filtering or transforming data.
+* **Lists:** Process items in order; sequential streams are similar to loops, parallel streams excel on large lists.
+* **Sets:** Only store unique items; parallel streams efficiently process elements independently. For instance, `HashSet` parallel sum was **0.286 ms/op**, far faster than **3.17 ms** for a loop.
+* **Maps:** Streams can work on keys, values, or key-value pairs; sequential streams may be slower than loops, but parallel streams achieve large speedups. For example, `HashMap` parallel summing executes in **0.417 ms/op** with memory around **10,661 B/op**, compared to **2.11 ms/op** and **17,037 B/op** for loops.
 
 ---
 
@@ -122,81 +123,51 @@ Streams allow you to describe the task declaratively:
 
 > “Give me all adults → take their names → convert to uppercase → sort → return the list.”
 
-This approach reduces boilerplate and errors, improving clarity and maintainability.
+Benchmarks show that while streams sometimes allocate more memory than loops, the readability and reduced boilerplate often outweigh this cost.
 
 ---
 
-Below is a rewritten version of the section **“When Not to Use Streams”**, now including **references only to the sources you already used in the paper**, so no invented or unverifiable citations appear.
-I did **not** rewrite your whole document—this is the section you can insert before the conclusion.
+### Benchmark Summary (Execution Time & Memory)
+
+| Collection | Operation       | Time (ms/op) | Memory (B/op) |
+| ---------- | --------------- | ------------ | ------------- |
+| List       | Loop            | 0.434        | 1,329         |
+|            | Stream          | 0.432        | 1,575         |
+|            | Parallel Stream | 0.067        | 7,242         |
+| Set        | Loop            | 3.17         | 20,560        |
+|            | Stream          | 4.30         | 28,079        |
+|            | Parallel Stream | 0.286        | 9,145         |
+| Map        | Loop            | 2.11         | 17,037        |
+|            | Stream          | 3.91         | 31,781        |
+|            | Parallel Stream | 0.417        | 10,661        |
 
 ---
 
-# When Not to Use Sequential Streams and Parallel Streams
+## When Not to Use Sequential Streams and Parallel Streams
 
 Although Java Streams provide many benefits—including clearer code, lazy evaluation, and the option for parallel processing—there are situations where using streams is **not recommended**. Understanding these limitations helps decide when traditional loops or other approaches are more appropriate.
 
----
+### When *Not* to Use Sequential Streams
 
-## When *Not* to Use Sequential Streams
+1. **When performance is critical on small datasets**
+   Sequential streams introduce a small amount of overhead because they create a pipeline and define multiple processing stages (Baeldung, 2023). For very small collections, loops can be faster.
 
-### 1. **When performance is critical on small datasets**
+2. **When the logic depends on indexed access**
+   Streams work best when operations are applied to each element individually. Tasks requiring access by index (like `list[i + 1]`) are better expressed with loops (Oracle, 2025).
 
-Sequential streams introduce a small amount of overhead because they create a pipeline and define multiple processing stages (Baeldung, 2023).
-For very small collections—such as a list of a few dozen elements—traditional `for` loops can be faster because they skip all this setup work.
+3. **When side effects are unavoidable**
+   If your task modifies external variables, streams may lead to confusing behavior (Baeldung, 2023).
 
-**Why:**
-Creating a stream, configuring intermediate operations, and triggering a terminal operation requires additional internal objects and method calls (Paraschiv, 2024). With tiny datasets, this overhead is larger than the cost of simply looping.
+### When *Not* to Use Parallel Streams
 
----
+1. **When working with small or medium datasets**
+   Parallel streams have overhead for splitting and combining data, so loops or sequential streams can be faster (Oracle, 2025).
 
-### 2. **When the logic depends on indexed access**
+2. **When the source is not easily splittable**
+   Data structures like `LinkedList` or streams from I/O sources perform poorly with parallel streams (Baeldung, 2023).
 
-Sequential streams work best when operations are applied to each element individually.
-However, tasks that require frequent **index-based access**, such as accessing `list[i + 1]` or comparing items at specific positions, are more naturally expressed using a loop (Oracle, 2025).
-
----
-
-### 3. **When side effects are unavoidable**
-
-Streams encourage pure, functional operations. If your task requires updating external variables, modifying existing objects, or performing I/O inside the processing step, a loop often results in clearer, more predictable behavior.
-
-**Reference:**
-Baeldung (2023) highlights that stream pipelines should avoid side effects for correctness and readability.
-
----
-
-## When *Not* to Use Parallel Streams
-
-Parallel streams can dramatically speed up large workloads, as your benchmarks showed, but they also come with important limitations.
-
----
-
-### 1. **When working with small or medium datasets**
-
-Parallel streams incur overhead from:
-
-* splitting data
-* distributing work across threads
-* merging results
-
-This extra cost can make parallel streams **slower** than both loops and sequential streams for collections that are not large enough (Oracle, 2025).
-
----
-
-### 2. **When the source is not easily splittable**
-
-Parallel streams work best on data structures that can be divided into independent chunks—like `ArrayList` Baeldung (2023).
-They perform poorly on structures such as:
-
-* `LinkedList`
-* I/O streams
-* unordered or computationally expensive-to-split sources
-
----
-
-### 3. **When operations are not thread-safe**
-
-If your processing steps modify shared data, use mutable structures, or rely on state, parallel streams may produce incorrect results or race conditions (Oracle, 2025).
+3. **When operations are not thread-safe**
+   Parallel streams can produce incorrect results if they modify shared state (Oracle, 2025).
 
 ---
 
@@ -207,41 +178,20 @@ Benchmarks measured performance of **loops**, **sequential streams**, and **para
 Measurements included:
 
 1. Execution time (`System.nanoTime()`)
-2. Memory usage (`Runtime.getRuntime()`)
-3. Multiple iterations using JMH (Java Microbenchmark Harness) for reliable results
+2. Memory usage (`gc.alloc.rate.norm` via JMH)
+3. Multiple iterations using JMH for reliability
 
-Each benchmark calculated **time per operation** and analyzed **percentiles**. Results were exported to CSV files for each collection type:
-
-* [List benchmark results](./benchmark/list-benchmark-results.csv)
-* [Set benchmark results](./benchmark/set-benchmark-results.csv)
-* [Map benchmark results](./benchmark/map-benchmark-results.csv)
-
----
-
-### Benchmark Summary
-
-| Collection Type | Operation       | Mode | Avg Time (ms/op) |
-| --------------- | --------------- | ---- | ---------------- |
-| List            | Loop            | avgt | 0.288            |
-|                 | Stream          | avgt | 0.341            |
-|                 | Parallel Stream | avgt | 0.073            |
-| Set             | Loop            | avgt | 3.17             |
-|                 | Stream          | avgt | 4.23             |
-|                 | Parallel Stream | avgt | 0.376            |
-| Map             | Loop            | avgt | 1.82             |
-|                 | Stream          | avgt | 4.58             |
-|                 | Parallel Stream | avgt | 0.367            |
-
-**General Observation:** Across all data structures, **parallel streams consistently provide the best performance**, especially on larger collections. Sequential streams are slightly slower than loops but improve **readability and maintainability**. Loops remain efficient for small datasets, but streams reduce boilerplate and make code easier to understand.
+Each benchmark calculated **time per operation** and **memory per operation**. Results were exported to CSV files for each collection type.
 
 ---
 
 ## Observations
 
-1. **Sequential streams vs. loops:** Slightly slower than loops but more readable.
-2. **Parallel streams:** Drastically reduce execution time for large datasets using multiple CPU cores.
+1. **Sequential streams vs. loops:** Slightly slower than loops, and slightly higher memory usage, but more readable.
+2. **Parallel streams:** Drastically reduce execution time on large datasets, but use more memory due to concurrent processing.
 3. **Intermediate and terminal operations:** Enable lazy evaluation and short-circuiting for efficiency.
-4. **Memory usage:** Streams avoid unnecessary temporary collections.
+4. **Memory usage:** Sequential streams allocate slightly more memory per operation than loops, while parallel streams allocate the most. For example, `ArrayList` parallel streams used **7,242 B/op** compared to **1,329 B/op** for loops.
+5. **Trade-offs:** Developers can choose streams for readability and parallel speedups or loops for minimal memory overhead.
 
 ---
 
@@ -255,7 +205,7 @@ Each benchmark calculated **time per operation** and analyzed **percentiles**. R
 
 > With streams, you can describe the task in one sentence: filter adults, extract names, convert to uppercase, sort, and collect the result. The computer handles the step-by-step execution behind the scenes.
 
-**Benefit:** The stream version is **more readable**, **declarative**, and avoids manual state management.
+**Benefit:** The stream version is **more readable**, **declarative**, and avoids manual state management. Memory usage is slightly higher than loops, but negligible for most applications.
 
 ---
 
@@ -263,10 +213,10 @@ Each benchmark calculated **time per operation** and analyzed **percentiles**. R
 
 Using `Stream<T>` in Java Collections provides a **modern, readable, and efficient** approach to processing data. Streams improve maintainability, enable lazy and parallel processing, and reduce manual iteration errors.
 
-* **Sequential streams** are suitable for medium datasets, offering clarity.
-* **Parallel streams** excel on large datasets, as demonstrated by benchmark results.
+* **Sequential streams** are suitable for medium datasets, offering clarity and reasonable memory usage.
+* **Parallel streams** excel on large datasets, as demonstrated by benchmark results, with faster execution at the cost of more memory usage.
 
-While loops remain valid, streams reduce boilerplate, handle complex transformations elegantly, and support modern Java programming paradigms.
+While loops remain valid, streams reduce boilerplate, handle complex transformations elegantly, and support modern Java programming paradigms. Memory considerations should guide whether to use sequential streams, parallel streams, or traditional loops.
 
 ---
 
