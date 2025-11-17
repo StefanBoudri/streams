@@ -50,8 +50,6 @@
 
 # **Slide 11 — Benchmark methodology**
 
-*(Improved, more explicit, explains JVM/JIT and why JMH is trustworthy)*
-
 * **Benchmarks were run using JMH (Java Microbenchmark Harness).**
   JMH is the official benchmarking tool created by the OpenJDK team.
 
