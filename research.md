@@ -199,7 +199,7 @@ Choosing the right approach depends on dataset size, readability needs, and memo
 
 ## **References** 
 
-* Baeldung. (2023, November 4). Introduction to Java Streams | Baeldung. [https://www.baeldung.com/java-8-streams-introduction](https://www.baeldung.com/java-8-streams-introduction)
+* Baeldung. (2023, November 4). Introduction to Java Streams | Baeldung. https://www.baeldung.com/java-8-streams-introduction
 * Baeldung. (2025, November 10). Working with Maps Using Streams | Baeldung. https://www.baeldung.com/java-maps-streams
 * Boudri, S. (2025, November 14). Benchmarking streams in Java with JMH. [Benchmark paper](./benchmark.md)
 * Oracle. (2025, October 20). Java Stream API. https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html
