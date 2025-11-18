@@ -14,6 +14,7 @@
 * Intermediate operations—like `filter`, `map`, and `sorted`—do not run immediately. Streams use *lazy evaluation*, meaning work is only done when the terminal operation is called.
 * The terminal operation—for example `sum()`, `count()`, or `collect()`—triggers the whole pipeline.
 * Streams can also run in parallel, where the data is split across multiple CPU cores for faster processing.
+  * Parallel streams use Java’s ForkJoinPool, which automatically divides work into smaller tasks and runs them across threads.
 * This model is different from loops, where everything executes step-by-step and immediately.
 
 # **Slide 7 — How to use streams?**
@@ -36,7 +37,15 @@
 
 * Streams are not always the best choice.
 * If you need index-based logic—for example `list.get(i + 1)`—then a loop is more clear and efficient.
-* Parallel streams should be avoided when thread-safety is not guaranteed. They can cause race conditions when modifying shared data structures.
+* Parallel streams should be avoided when thread-safety is not guaranteed. 
+  * They can cause race conditions when modifying shared data structures.
+  * They can corrupt shared collections.\
+  If each thread adds elements to the same list or modifies a shared object, you can get:
+    * **missing elements**
+    * **duplicated elements**
+    * **partially written data**
+    * **broken internal state**  
+
 * For very small datasets, streams may add unnecessary overhead compared to a simple loop.
 * If the lambdas make the code harder to read rather than easier, a loop is the better option.
 
