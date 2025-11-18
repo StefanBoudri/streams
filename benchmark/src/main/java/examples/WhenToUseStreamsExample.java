@@ -45,7 +45,7 @@ public class WhenToUseStreamsExample {
 
 
         // ----------------------------------------------------------
-        // 3. PARALLEL STREAM VERSION (MAKES SENSE HERE)
+        // 3. PARALLEL STREAM VERSION
         // ----------------------------------------------------------
 
         List<String> heavyProcessedNamesParallel = users.parallelStream()
